@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<!-- By Ion-o-koji -->
+<html lang="en">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+      <link rel="manifest" href="/pwa/manifest.json" />
+    <meta name="theme-color" content="#0f0f1a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Ion-o-koji's Portal" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link rel="apple-touch-icon" href="/pwa/appicon-192.png" />
+  <title>Ion-o-koji's Portal v2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --bg2: #111115;
+      --bg3: #16161b;
+      --border: #2a2a32;
+      --fg: #e8e6e1;
+      --fg2: #7a7872;
+      --fg3: #4a4944;
+      --accent: #6c167d;
+      --accentL: #8f2aa3;
+      --accentD: rgba(108, 22, 125, .12);
+      --accentG: rgba(108, 22, 125, .25);
+      --ok: #3dd68c;
+      --okD: rgba(61, 214, 140, .12);
+      --err: #f05e5e;
+      --errD: rgba(240, 94, 94, .12);
+      --r: 10px;
+      --rs: 6px;
+    }
+
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent
+    }
+
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      height: 100dvh;
+      overflow: hidden
+    }
+
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -30%;
+      left: -10%;
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(ellipse, rgba(108, 22, 125, .05)0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0
+    }
+
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -20%;
+      right: -5%;
+      width: 50%;
+      height: 50%;
+      background: radial-gradient(ellipse, rgba(61, 214, 140, .03)0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0
+    }
+
+
+    .app {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      max-width: 480px;
+      margin: 0 auto
+    }
+
+
+    .portal-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      min-height: 58px;
+      padding: 10px 16px;
+      background: rgba(10, 10, 12, .82);
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      flex-shrink: 0
+    }
+
+
+    .portal-brand span {
+      color: var(--fg)
+    }
+
+
+    .portal-brand strong {
+      color: var(--accentL);
+      font-weight: 700
+    }
+
+
+    .portal-brand small {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0;
+      color: var(--fg3)
+    }
+
+
+    .panels {
+      flex: 1;
+      position: relative;
+      overflow: hidden
+    }
+
+
+    .panel {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 20px 16px 24px;
+      opacity: 0;
+      transform: translateY(6px);
+      pointer-events: none;
+      transition: opacity .22s, transform .22s;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent
+    }
+
+
+    .panel.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto
+    }
+
+
+    .panel::-webkit-scrollbar {
+      width: 4px
+    }
+
+
+    .panel::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px
+    }
+
+
+    /* Tab bar */
+    .tab-bar {
+      display: flex;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 6px 0 env(safe-area-inset-bottom, 8px);
+      position: relative;
+      z-index: 10
+    }
+
+
+    .tab-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 6px 0;
+      background: none;
+      border: none;
+      color: var(--fg3);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color .2s;
+      position: relative
+    }
+
+
+    .tab-btn i {
+      font-size: 18px;
+      transition: transform .2s, color .2s
+    }
+
+
+    .tab-btn.active {
+      color: var(--accent)
+    }
+
+
+    .tab-btn.active i {
+      transform: scale(1.1)
+    }
+
+
+    .tab-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 1px;
+      transform: translateX(-50%);
+      transition: width .25s
+    }
+
+
+    .tab-btn.active::before {
+      width: 24px
+    }
+
+
+    /* Shared components */
+    .sec-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--fg2);
+      margin: 24px 0 12px
+    }
+
+
+    .sec-head:first-child {
+      margin-top: 0
+    }
+
+
+    .sec-head i {
+      color: var(--accent);
+      font-size: 12px
+    }
+
+
+    .sec-head .cnt {
+      color: var(--fg3);
+      font-weight: 400;
+      margin-left: auto;
+      text-transform: none;
+      letter-spacing: 0
+    }
+
+
+    input[type=text],
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      color: var(--fg);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s
+    }
+
+
+    input[type=text]:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accentD)
+    }
+
+
+    textarea {
+      resize: vertical;
+      line-height: 1.55
+    }
+
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--fg3)
+    }
+
+
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--fg2);
+      margin-bottom: 6px
+    }
+
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: var(--rs);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap
+    }
+
+
+    .btn:active {
+      transform: scale(.96)
+    }
+
+
+    .btn-p {
+      background: var(--accent);
+      color: var(--fg)
+    }
+
+
+    .btn-p:hover {
+      box-shadow: 0 4px 16px var(--accentG)
+    }
+
+
+    .btn-p:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      box-shadow: none
+    }
+
+
+    .btn-s {
+      background: var(--bg2);
+      color: var(--fg);
+      border: 1px solid var(--border)
+    }
+
+
+    .btn-s:hover {
+      border-color: var(--fg2)
+    }
+
+
+    .btn-g {
+      background: transparent;
+      color: var(--fg2);
+      padding: 8px 10px
+    }
+
+
+    .btn-g:hover {
+      color: var(--accent);
+      background: var(--accentD)
+    }
+
+
+    .btn-d {
+      background: var(--errD);
+      color: var(--err);
+      border: 1px solid rgba(240, 94, 94, .2)
+    }
+
+
+    .btn-d:hover {
+      background: rgba(240, 94, 94, .2)
+    }
+
+
+    .btn-block {
+      width: 100%
+    }
+
+
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+
+    .row>* {
+      flex: 1
+    }
+
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--r);
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .25s;
+      position: relative
+    }
+
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--accent);
+      background: var(--accentD)
+    }
+
+
+    .drop-zone .dz-icon {
+      font-size: 36px;
+      color: var(--fg3);
+      margin-bottom: 12px;
+      transition: color .25s
+    }
+
+
+    .drop-zone:hover .dz-icon,
+    .drop-zone.dragover .dz-icon {
+      color: var(--accent)
+    }
+
+
+    .drop-zone .dz-text {
+      font-size: 14px;
+      color: var(--fg2);
+      font-weight: 500;
+      margin-bottom: 4px
+    }
+
+
+    .drop-zone .dz-sub {
+      font-size: 11px;
+      color: var(--fg3)
+    }
+
+
+    .drop-zone input[type=file] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer
+    }
+
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--accentD);
+      border: 1px solid rgba(108, 22, 125, .2);
+      border-radius: var(--rs);
+      margin-top: 12px;
+      font-size: 13px;
+      animation: slideIn .3s ease
+    }
+
+
+    .file-info i {
+      color: var(--accent)
+    }
+
+
+    .file-info .fi-name {
+      font-weight: 500;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+
+    .file-info .fi-size {
+      color: var(--fg2);
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace
+    }
+
+
+    .file-info .fi-remove {
+      color: var(--fg3);
+      cursor: pointer;
+      padding: 4px;
+      transition: color .2s
+    }
+
+
+    .file-info .fi-remove:hover {
+      color: var(--err)
+    }
+
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-6px)
+      }
+
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+
+    /* Big open button */
+    .open-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accentL));
+      color: var(--fg);
+      border: none;
+      border-radius: var(--r);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      box-shadow: 0 4px 20px var(--accentG);
+      margin-top: 16px
+    }
+
+
+    .open-btn:hover {
+      box-shadow: 0 6px 28px rgba(108, 22, 125, .35)
+    }
+
+
+    .open-btn:active {
+      transform: scale(.97)
+    }
+
+
+    .open-btn:disabled {
+      opacity: .3;
+      cursor: not-allowed;
+      box-shadow: none
+    }
+
+
+    .open-btn i {
+      font-size: 16px
+    }
+
+
+    /* Method indicator pill */
+    .method-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 11px;
+      color: var(--fg2);
+      margin-top: 10px;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+
+    .method-pill:hover {
+      border-color: var(--accent);
+      color: var(--accent)
+    }
+
+
+    .method-pill i {
+      font-size: 10px;
+      color: var(--accent)
+    }
+
+
+    /* Advanced toggle */
+    .adv-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      cursor: pointer;
+      transition: all .2s;
+      margin-top: 20px;
+      -webkit-user-select: none;
+      user-select: none
+    }
+
+
+    .adv-toggle:hover {
+      border-color: var(--fg3)
+    }
+
+
+    .adv-toggle .adv-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--fg2)
+    }
+
+
+    .adv-toggle .adv-left i {
+      color: var(--fg3);
+      font-size: 14px
+    }
+
+
+    .adv-toggle .adv-switch {
+      width: 36px;
+      height: 20px;
+      background: var(--border);
+      border-radius: 10px;
+      position: relative;
+      transition: background .2s
+    }
+
+
+    .adv-toggle.on .adv-switch {
+      background: var(--accent)
+    }
+
+
+    .adv-toggle .adv-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: var(--fg);
+      border-radius: 50%;
+      transition: transform .2s
+    }
+
+
+    .adv-toggle.on .adv-switch::after {
+      transform: translateX(16px)
+    }
+
+
+    .adv-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .3s ease, opacity .2s;
+      opacity: 0
+    }
+
+
+    .adv-panel.open {
+      max-height: 600px;
+      opacity: 1
+    }
+
+
+    .adv-panel-inner {
+      padding: 16px 0
+    }
+
+
+    /* Library cards */
+    .lib-card {
+      padding: 14px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      margin-bottom: 8px;
+      transition: border-color .2s;
+      animation: cardIn .3s ease both
+    }
+
+
+    @keyframes cardIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px)
+      }
+
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+
+    .lib-card:hover {
+      border-color: var(--fg3)
+    }
+
+
+    .lib-card.pinned {
+      border-left: 3px solid var(--accent)
+    }
+
+
+    .lib-card-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px
+    }
+
+
+    .lib-card-head .pin-btn {
+      background: none;
+      border: none;
+      color: var(--fg3);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 2px;
+      transition: color .2s
+    }
+
+
+    .lib-card-head .pin-btn:hover,
+    .lib-card-head .pin-btn.pinned {
+      color: var(--accent)
+    }
+
+
+    .lib-card-name {
+      font-size: 13px;
+      font-weight: 600;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+
+    .lib-card-time {
+      font-size: 10px;
+      color: var(--fg3);
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap
+    }
+
+
+    .lib-card-preview {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--fg3);
+      line-height: 1.4;
+      max-height: 32px;
+      overflow: hidden;
+      word-break: break-all;
+      margin-bottom: 10px
+    }
+
+
+    .lib-card-actions {
+      display: flex;
+      gap: 6px
+    }
+
+
+    .lib-card-actions .btn {
+      flex: 1;
+      padding: 8px 6px;
+      font-size: 11px
+    }
+
+
+    /* Explore items */
+    .exp-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all .15s;
+      animation: cardIn .3s ease both
+    }
+
+
+    .exp-item:hover {
+      border-color: var(--accent);
+      background: var(--accentD)
+    }
+
+
+    .exp-item:active {
+      transform: scale(.98)
+    }
+
+
+    .exp-item .exp-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accentD);
+      color: var(--accent);
+      border-radius: 8px;
+      font-size: 14px;
+      flex-shrink: 0
+    }
+
+
+    .exp-item .exp-info {
+      flex: 1;
+      min-width: 0
+    }
+
+
+    .exp-item .exp-name {
+      font-size: 13px;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+
+    .exp-item .exp-path {
+      font-size: 10px;
+      color: var(--fg3);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 2px
+    }
+
+
+    .exp-item .exp-arrow {
+      color: var(--fg3);
+      font-size: 12px
+    }
+
+
+    /* Settings option cards */
+    .opt-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--bg3);
+      border: 2px solid var(--border);
+      border-radius: var(--rs);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+
+    .opt-card:hover {
+      border-color: var(--fg3)
+    }
+
+
+    .opt-card.selected {
+      border-color: var(--accent);
+      background: var(--accentD)
+    }
+
+
+    .opt-card .opt-radio {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color .2s
+    }
+
+
+    .opt-card.selected .opt-radio {
+      border-color: var(--accent)
+    }
+
+
+    .opt-card.selected .opt-radio::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent)
+    }
+
+
+    .opt-card .opt-info {
+      flex: 1
+    }
+
+
+    .opt-card .opt-name {
+      font-size: 13px;
+      font-weight: 600
+    }
+
+
+    .opt-card .opt-desc {
+      font-size: 11px;
+      color: var(--fg3);
+      margin-top: 2px;
+      line-height: 1.3
+    }
+
+
+    .opt-card .opt-icon {
+      color: var(--fg3);
+      font-size: 16px;
+      width: 20px;
+      text-align: center
+    }
+
+
+    .opt-card.selected .opt-icon {
+      color: var(--accent)
+    }
+
+
+    /* Empty states */
+    .empty {
+      padding: 40px 16px;
+      text-align: center;
+      color: var(--fg3);
+      font-size: 13px
+    }
+
+
+    .empty i {
+      font-size: 28px;
+      display: block;
+      margin-bottom: 10px;
+      color: var(--fg3)
+    }
+
+
+    .empty p {
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--fg3)
+    }
+
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 32px;
+      color: var(--fg2);
+      font-size: 13px
+    }
+
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .6s linear infinite
+    }
+
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+
+    /* Toast */
+    .toast-box {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: min(92vw, 400px)
+    }
+
+
+    .toast {
+      padding: 10px 14px;
+      border-radius: var(--rs);
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      animation: tIn .25s ease, tOut .25s ease 2.6s forwards;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .5)
+    }
+
+
+    .toast-ok {
+      background: var(--okD);
+      border: 1px solid rgba(61, 214, 140, .25);
+      color: var(--ok)
+    }
+
+
+    .toast-err {
+      background: var(--errD);
+      border: 1px solid rgba(240, 94, 94, .25);
+      color: var(--err)
+    }
+
+
+    .toast-info {
+      background: var(--accentD);
+      border: 1px solid rgba(108, 22, 125, .25);
+      color: var(--accent)
+    }
+
+
+    @keyframes tIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px)
+      }
+
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+
+    @keyframes tOut {
+      to {
+        opacity: 0;
+        transform: translateY(-10px)
+      }
+    }
+
+
+    .danger-zone {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border)
+    }
+
+
+    .title-bar {
+      text-align: center;
+      margin-bottom: 20px
+    }
+
+
+    .title-bar h2 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -.3px
+    }
+
+
+    .title-bar h2 span {
+      color: var(--accent)
+    }
+
+
+    .title-bar p {
+      font-size: 11px;
+      color: var(--fg3);
+      margin-top: 2px
+    }
+
+
+    @media(min-width:481px) {
+      .app {
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border)
+      }
+    }
+
+
+  </style>
+</head>
+
+
+<body>
+
+
+  <div class="toast-box" id="toasts"></div>
+
+
+  <div class="app">
+    <header class="portal-brand" aria-label="Jade's Portal">
+      <span>Ion-o-koji's <strong>Portal</strong></span>
+      
+    </header>
+    <div class="panels">
+
+
+      <!-- EXPLORE PANEL (Tab 1) -->
+      <section class="panel active" id="panelExplore">
+        <div class="title-bar">
+          <h2><span>Explore</span></h2>
+          <p>Selected files from the Official Library</p>
+        </div>
+        <div id="expContent">
+          <div class="loading"><span class="spinner"></span> Fetching curated list...</div>
+        </div>
+        <button class="btn btn-s btn-block" onclick="exploreRefresh()" style="margin-top:12px"><i class="fa-solid fa-rotate"></i> Refresh List</button>
+      </section>
+
+
+      <!-- LIBRARY PANEL (Tab 2) -->
+      <section class="panel" id="panelLibrary">
+        <div class="title-bar">
+          <h2><span>Library</span></h2>
+          <p>Your saved pages — star to keep forever</p>
+        </div>
+        <div id="libContent"></div>
+      </section>
+
+
+      <!-- OPEN PANEL (Tab 3) -->
+      <section class="panel" id="panelOpen">
+        <div class="title-bar">
+          <h2>Open <span>HTML</span></h2>
+          <p>Upload a file and open it instantly</p>
+        </div>
+
+
+        <!-- Drop zone -->
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="fileInput" accept=".html,.htm,.txt">
+          <div class="dz-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+          <div class="dz-text">Drop an HTML file here</div>
+          <div class="dz-sub">or tap to browse files</div>
+        </div>
+        <div id="fileInfo"></div>
+
+
+        <!-- Page name -->
+        <div id="nameField" style="margin-top:14px;display:none">
+          <label class="field-label">Page name</label>
+          <input type="text" id="pageName" placeholder="My Page">
+        </div>
+
+
+        <!-- Big open button -->
+        <button class="open-btn" id="openBtn" onclick="openUploaded()" disabled>
+          <i class="fa-solid fa-play"></i> Open
+        </button>
+
+
+        <!-- Method indicator -->
+        <div style="text-align:center">
+          <div class="method-pill" id="methodPill" onclick="switchTab('settings')">
+            <i class="fa-solid fa-circle"></i> <span id="methodPillText">Blob URL</span>
+            <i class="fa-solid fa-pen" style="margin-left:2px;font-size:9px"></i>
+          </div>
+        </div>
+
+
+        <!-- Pin to library -->
+        <button class="btn btn-s btn-block" id="saveBtn" onclick="saveUploaded()" disabled style="margin-top:14px">
+          <i class="fa-solid fa-thumbtack"></i> Pin to Library
+        </button>
+
+
+        <!-- Advanced toggle -->
+        <div class="adv-toggle" id="advToggle" onclick="toggleAdvanced()">
+          <div class="adv-left">
+            <i class="fa-solid fa-terminal"></i>
+            Write or paste HTML manually
+          </div>
+          <div class="adv-switch"></div>
+        </div>
+        <div class="adv-panel" id="advPanel">
+          <div class="adv-panel-inner">
+            <textarea id="editorCode" placeholder="<!DOCTYPE html>
+<html>
+  <head><title>Hello</title></head>
+  <body><h1>Hello world</h1></body>
+</html>" style="height:clamp(160px,35vh,300px)"></textarea>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:11px;color:var(--fg3)">
+              <span id="editorMeta" style="font-family:'JetBrains Mono',monospace">0 chars · 0 lines</span>
+              <button class="btn btn-g" onclick="insertTemplate()" style="font-size:10px;padding:4px 8px"><i class="fa-solid fa-wand-magic-sparkles"></i> Template</button>
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button class="btn btn-p" id="advOpenBtn" onclick="openManual()" disabled><i class="fa-solid fa-play"></i> Open</button>
+              <button class="btn btn-s" id="advSaveBtn" onclick="saveManual()" disabled><i class="fa-solid fa-thumbtack"></i> Pin</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- SETTINGS PANEL (Tab 4) -->
+      <section class="panel" id="panelSettings">
+        <div class="title-bar">
+          <h2><span>Settings</span></h2>
+        </div>
+
+
+        <div class="sec-head"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open Method</div>
+        <div id="methodOptions"></div>
+
+
+        <div class="sec-head" style="margin-top:28px"><i class="fa-solid fa-database"></i> Data</div>
+        <div style="font-size:12px;color:var(--fg2);margin-bottom:12px" id="dataStats">Loading...</div>
+
+
+        <div class="danger-zone">
+          <div class="sec-head" style="color:var(--err)"><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</div>
+          <button class="btn btn-d btn-block" id="clearBtn" onclick="clearAllData()"><i class="fa-solid fa-trash-can"></i> Clear All Saved Data</button>
+        </div>
+      </section>
+
+
+    </div>
+
+
+    <!-- Tab bar -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" data-tab="explore" onclick="switchTab('explore')">
+        <i class="fa-solid fa-compass"></i><span>Explore</span>
+      </button>
+      <button class="tab-btn" data-tab="library" onclick="switchTab('library')">
+        <i class="fa-solid fa-bookmark"></i><span>Library</span>
+      </button>
+      <button class="tab-btn" data-tab="open" onclick="switchTab('open')">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i><span>Open</span>
+      </button>
+      <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">
+        <i class="fa-solid fa-gear"></i><span>Settings</span>
+      </button>
+    </nav>
+  </div>
+
+
+  <script>
+    /* ─── State ─── */
+    let db = null;
+    let editingId = null;
+    let uploadedContent = null;
+    let uploadedFileName = null;
+    let exploreCache = null;
+    const DB_NAME = 'htmlvault';
+    const DB_VER = 1;
+    const STORE = 'pages';
+    const EXPLORE_REPO = 'Ion-o-koji/Ion-o-koji-s-Index';
+    const GIST_USER = 'Ion-o-koji';
+    const GISTS_PER_PAGE = 100;
+    const METHOD_LABELS = {
+      blob: 'Blob URL',
+      aboutblank: 'about:blank',
+      replace: 'Replace Current'
+    };
+
+var APP_VERSION = "2";
+
+    /* ─── Toast ─── */
+    function toast(msg, type = 'info') {
+      const c = document.getElementById('toasts');
+      const t = document.createElement('div');
+      const cls = {
+        ok: 'toast-ok',
+        err: 'toast-err',
+        info: 'toast-info'
+      };
+      const ico = {
+        ok: 'fa-circle-check',
+        err: 'fa-circle-xmark',
+        info: 'fa-circle-info'
+      };
+      t.className = `toast ${cls[type]||cls.info}`;
+      t.innerHTML = `<i class="fa-solid ${ico[type]||ico.info}"></i> ${msg}`;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+
+    /* ─── IndexedDB ─── */
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, DB_VER);
+        req.onupgradeneeded = e => {
+          const d = e.target.result;
+          if (!d.objectStoreNames.contains(STORE)) {
+            const s = d.createObjectStore(STORE, {
+              keyPath: 'id',
+              autoIncrement: true
+            });
+            s.createIndex('pinned', 'pinned');
+            s.createIndex('timestamp', 'timestamp');
+          }
+        };
+        req.onsuccess = e => {
+          db = e.target.result;
+          resolve(db);
+        };
+        req.onerror = e => reject(e.target.error);
+      });
+    }
+
+
+    function dbAll() {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, 'readonly');
+        const req = tx.objectStore(STORE).getAll();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+
+    function dbPut(item) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, 'readwrite');
+        const req = tx.objectStore(STORE).put(item);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+
+    function dbAdd(item) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, 'readwrite');
+        const req = tx.objectStore(STORE).add(item);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+
+    function dbDelete(id) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, 'readwrite');
+        const req = tx.objectStore(STORE).delete(id);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+
+    function dbClear() {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, 'readwrite');
+        const req = tx.objectStore(STORE).clear();
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+
+    /* Prune non-pinned to max 5 */
+    async function pruneRecent() {
+      const all = await dbAll();
+      const nonPinned = all.filter(x => !x.pinned).sort((a, b) => b.timestamp - a.timestamp);
+      if (nonPinned.length > 5) {
+        for (const item of nonPinned.slice(5)) await dbDelete(item.id);
+      }
+    }
+
+
+    /* ─── Tab switching ─── */
+    function switchTab(name) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+      const map = {
+        explore: 'panelExplore',
+        library: 'panelLibrary',
+        open: 'panelOpen',
+        settings: 'panelSettings'
+      };
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === map[name]));
+      if (name === 'library') renderLibrary();
+      if (name === 'settings') renderSettings();
+      if (name === 'explore' && !exploreCache) exploreFetch();
+    }
+
+
+    /* ─── Settings ─── */
+    function getMethod() {
+      return localStorage.getItem('hv_method') || 'blob';
+    }
+
+
+    function setMethod(m) {
+      localStorage.setItem('hv_method', m);
+      renderSettings();
+      updateMethodPill();
+    }
+
+
+    function updateMethodPill() {
+      document.getElementById('methodPillText').textContent = METHOD_LABELS[getMethod()] || 'Blob URL';
+    }
+
+
+    function renderSettings() {
+      const methods = [{
+          id: 'blob',
+          icon: 'fa-link',
+          name: 'Blob URL',
+          desc: 'Sandboxed origin. Safe and modern.'
+        },
+        {
+          id: 'aboutblank',
+          icon: 'fa-file-circle-plus',
+          name: 'about:blank',
+          desc: 'Writes into a blank tab. Inherits opener origin.'
+        },
+        {
+          id: 'replace',
+          icon: 'fa-rotate',
+          name: 'Replace Current',
+          desc: 'Overwrites this page entirely. Fastest on mobile.'
+        }
+      ];
+      const cur = getMethod();
+      document.getElementById('methodOptions').innerHTML = methods.map(m => `
+    <div class="opt-card ${m.id===cur?'selected':''}" onclick="setMethod('${m.id}')">
+      <div class="opt-icon"><i class="fa-solid ${m.icon}"></i></div>
+      <div class="opt-info"><div class="opt-name">${m.name}</div><div class="opt-desc">${m.desc}</div></div>
+      <div class="opt-radio"></div>
+    </div>
+  `).join('');
+
+
+      dbAll().then(all => {
+        const pinned = all.filter(x => x.pinned).length;
+        const recent = all.filter(x => !x.pinned).length;
+        document.getElementById('dataStats').innerHTML = `<strong>${all.length}</strong> total · <strong>${pinned}</strong> pinned · <strong>${recent}</strong> recent (max 5)`;
+      }).catch(() => {});
+    }
+
+
+    /* ─── Open HTML (core) ─── */
+    function openHTML(html, name) {
+      if (!html || !html.trim()) {
+        toast('No HTML to open', 'err');
+        return;
+      }
+      const method = getMethod();
+
+
+      if (method === 'blob') {
+        const blob = new Blob([html], {
+          type: 'text/html'
+        });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      } else if (method === 'aboutblank') {
+        const w = window.open('about:blank', '_blank');
+        if (!w) {
+          toast('Pop-up blocked — allow pop-ups', 'err');
+          return;
+        }
+        w.document.open();
+        w.document.write(html);
+        w.document.close();
+      } else if (method === 'replace') {
+        document.open();
+        document.write(html);
+        document.close();
+      }
+    }
+
+
+    /* Open HTML and auto-save to Recents */
+    async function openAndAutoSave(html, name) {
+      if (!html || !html.trim()) {
+        toast('No HTML to open', 'err');
+        return;
+      }
+
+
+      try {
+        const all = await dbAll();
+        const existing = all.find(x => x.code === html);
+        if (existing) {
+          existing.timestamp = Date.now();
+          if (name) existing.name = name; // Update name if provided
+          await dbPut(existing);
+        } else {
+          await dbAdd({
+            name: name || 'Untitled',
+            code: html,
+            timestamp: Date.now(),
+            pinned: false
+          });
+        }
+        await pruneRecent();
+        if (document.getElementById('panelLibrary').classList.contains('active')) renderLibrary();
+      } catch (e) {
+        console.error("Auto-save failed", e);
+      }
+
+
+      openHTML(html, name);
+    }
+
+
+    /* ─── Open tab: Upload ─── */
+    const dropZone = document.getElementById('dropZone');
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file) readFile(file);
+    });
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) readFile(file);
+      this.value = '';
+    });
+
+
+    function readFile(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        uploadedContent = reader.result;
+        uploadedFileName = file.name.replace(/\.[^.]+$/, '');
+        const sizeKB = (file.size / 1024).toFixed(1);
+
+
+        document.getElementById('fileInfo').innerHTML = `
+      <div class="file-info">
+        <i class="fa-solid fa-file-code"></i>
+        <span class="fi-name">${file.name}</span>
+        <span class="fi-size">${sizeKB} KB</span>
+        <span class="fi-remove" onclick="clearUpload()"><i class="fa-solid fa-xmark"></i></span>
+      </div>`;
+
+
+        document.getElementById('nameField').style.display = 'block';
+        document.getElementById('pageName').value = uploadedFileName;
+        document.getElementById('openBtn').disabled = false;
+        document.getElementById('saveBtn').disabled = false;
+        toast('Loaded: ' + file.name, 'ok');
+      };
+      reader.onerror = () => toast('Failed to read file', 'err');
+      reader.readAsText(file);
+    }
+
+
+    function clearUpload() {
+      uploadedContent = null;
+      uploadedFileName = null;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('fileInfo').innerHTML = '';
+      document.getElementById('nameField').style.display = 'none';
+      document.getElementById('pageName').value = '';
+      document.getElementById('openBtn').disabled = true;
+      document.getElementById('saveBtn').disabled = true;
+    }
+
+
+    function openUploaded() {
+      if (!uploadedContent) return;
+      openAndAutoSave(uploadedContent, document.getElementById('pageName').value || uploadedFileName);
+    }
+
+
+    async function saveUploaded() {
+      if (!uploadedContent) return;
+      const name = document.getElementById('pageName').value.trim() || uploadedFileName || 'Untitled';
+      try {
+        if (editingId) {
+          const all = await dbAll();
+          const item = all.find(x => x.id === editingId);
+          if (item) {
+            item.name = name;
+            item.code = uploadedContent;
+            item.timestamp = Date.now();
+            item.pinned = true; // Pin on manual save
+            await dbPut(item);
+            toast('Pinned: ' + name, 'ok');
+          }
+        } else {
+          await dbAdd({
+            name,
+            code: uploadedContent,
+            timestamp: Date.now(),
+            pinned: true
+          });
+          toast('Pinned: ' + name, 'ok');
+        }
+        await pruneRecent();
+        editingId = null;
+        if (document.getElementById('panelLibrary').classList.contains('active')) renderLibrary();
+      } catch (e) {
+        toast('Pin failed: ' + e.message, 'err');
+      }
+    }
+
+
+    /* ─── Open tab: Advanced editor ─── */
+    const editorCode = document.getElementById('editorCode');
+
+
+    function toggleAdvanced() {
+      const toggle = document.getElementById('advToggle');
+      const panel = document.getElementById('advPanel');
+      const isOn = toggle.classList.toggle('on');
+      panel.classList.toggle('open', isOn);
+    }
+
+
+    function editorUpdate() {
+      const code = editorCode.value;
+      const chars = code.length;
+      const lines = code ? code.split('\n').length : 0;
+      document.getElementById('editorMeta').textContent = `${chars} chars · ${lines} lines`;
+      document.getElementById('advOpenBtn').disabled = !code.trim();
+      document.getElementById('advSaveBtn').disabled = !code.trim();
+    }
+    editorCode.addEventListener('input', editorUpdate);
+
+
+    function insertTemplate() {
+      if (editorCode.value.trim()) {
+        toast('Clear editor first to use template', 'info');
+        return;
+      }
+      editorCode.value = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello World</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; margin: 0;
+      background: #1a1a2e; color: #eaeaea;
+    }
+    h1 { font-size: 2.5rem; }
+  </style>
+</head>
+<body><h1>Hello, World!</h1></body>
+</html>`;
+      editorUpdate();
+    }
+
+
+    function openManual() {
+      openAndAutoSave(editorCode.value, 'Manual HTML');
+    }
+
+
+    async function saveManual() {
+      const code = editorCode.value.trim();
+      if (!code) return;
+      const name = document.getElementById('pageName').value.trim() || 'Manual HTML';
+      try {
+        if (editingId) {
+          const all = await dbAll();
+          const item = all.find(x => x.id === editingId);
+          if (item) {
+            item.name = name;
+            item.code = code;
+            item.timestamp = Date.now();
+            item.pinned = true; // Pin on manual save
+            await dbPut(item);
+            toast('Pinned: ' + name, 'ok');
+          }
+        } else {
+          await dbAdd({
+            name,
+            code,
+            timestamp: Date.now(),
+            pinned: true
+          });
+          toast('Pinned: ' + name, 'ok');
+        }
+        await pruneRecent();
+        editingId = null;
+        if (document.getElementById('panelLibrary').classList.contains('active')) renderLibrary();
+      } catch (e) {
+        toast('Pin failed: ' + e.message, 'err');
+      }
+    }
+
+
+    /* ─── Library ─── */
+    async function renderLibrary() {
+      const container = document.getElementById('libContent');
+      try {
+        const all = await dbAll();
+        const pinned = all.filter(x => x.pinned).sort((a, b) => b.timestamp - a.timestamp);
+        const recent = all.filter(x => !x.pinned).sort((a, b) => b.timestamp - a.timestamp);
+
+
+        if (all.length === 0) {
+          container.innerHTML = `<div class="empty"><i class="fa-regular fa-bookmark"></i>No saved pages yet<p>Upload or write HTML, then hit Open or Pin</p></div>`;
+          return;
+        }
+
+
+        let html = '';
+        if (pinned.length) {
+          html += `<div class="sec-head"><i class="fa-solid fa-star"></i> Pinned <span class="cnt">${pinned.length}</span></div>`;
+          pinned.forEach(item => {
+            html += renderLibCard(item);
+          });
+        }
+        if (recent.length) {
+          html += `<div class="sec-head"><i class="fa-solid fa-clock-rotate-left"></i> Recent <span class="cnt">${recent.length} / 5</span></div>`;
+          recent.forEach(item => {
+            html += renderLibCard(item);
+          });
+        }
+        container.innerHTML = html;
+      } catch (e) {
+        container.innerHTML = `<div class="empty"><i class="fa-solid fa-circle-xmark"></i> Error loading library</div>`;
+      }
+    }
+
+
+    function renderLibCard(item) {
+      const timeAgo = relTime(item.timestamp);
+      const preview = item.code.substring(0, 100).replace(/</g, '&lt;').replace(/\n/g, ' ');
+      return `
+    <div class="lib-card ${item.pinned?'pinned':''}">
+      <div class="lib-card-head">
+        <button class="pin-btn ${item.pinned?'pinned':''}" onclick="togglePin(${item.id}, ${!item.pinned})" title="${item.pinned?'Unpin':'Pin'}">
+          <i class="fa-${item.pinned?'solid':'regular'} fa-star"></i>
+        </button>
+        <span class="lib-card-name">${esc(item.name)}</span>
+        <span class="lib-card-time">${timeAgo}</span>
+      </div>
+      <div class="lib-card-preview">${preview}</div>
+      <div class="lib-card-actions">
+        <button class="btn btn-p" onclick="libOpen(${item.id})"><i class="fa-solid fa-play"></i> Open</button>
+        <button class="btn btn-s" onclick="libEdit(${item.id})"><i class="fa-solid fa-pen"></i> Edit</button>
+        <button class="btn btn-d" onclick="libDelete(${item.id})"><i class="fa-solid fa-trash-can"></i></button>
+      </div>
+    </div>`;
+    }
+
+
+    function esc(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+
+    function relTime(ts) {
+      const d = Date.now() - ts;
+      if (d < 60000) return 'just now';
+      if (d < 3600000) return Math.floor(d / 60000) + 'm ago';
+      if (d < 86400000) return Math.floor(d / 3600000) + 'h ago';
+      return Math.floor(d / 86400000) + 'd ago';
+    }
+
+
+    async function togglePin(id, pin) {
+      const all = await dbAll();
+      const item = all.find(x => x.id === id);
+      if (!item) return;
+      item.pinned = pin;
+      await dbPut(item);
+      if (!pin) await pruneRecent();
+      renderLibrary();
+      toast(pin ? 'Pinned: ' + item.name : 'Unpinned: ' + item.name, 'ok');
+    }
+
+
+    async function libOpen(id) {
+      const all = await dbAll();
+      const item = all.find(x => x.id === id);
+      if (!item) return;
+      openAndAutoSave(item.code, item.name);
+    }
+
+
+    async function libEdit(id) {
+      const all = await dbAll();
+      const item = all.find(x => x.id === id);
+      if (!item) return;
+
+
+      /* Load into the Open tab's advanced editor */
+      switchTab('open');
+
+
+      /* Turn on advanced mode */
+      const toggle = document.getElementById('advToggle');
+      const panel = document.getElementById('advPanel');
+      if (!toggle.classList.contains('on')) {
+        toggle.classList.add('on');
+        panel.classList.add('open');
+      }
+
+
+      editorCode.value = item.code;
+      document.getElementById('pageName').value = item.name;
+      editingId = item.id;
+      editorUpdate();
+      toast('Editing: ' + item.name, 'info');
+    }
+
+
+    async function libDelete(id) {
+      await dbDelete(id);
+      renderLibrary();
+      toast('Deleted', 'ok');
+    }
+
+
+    /* ─── Explore ─── */
+    async function fetchRepoHtmlPages() {
+      let tree = null;
+      let resolvedBranch = null;
+
+
+      for (const branch of ['main', 'master']) {
+        try {
+          const res = await fetch(`https://api.github.com/repos/${EXPLORE_REPO}/git/trees/${branch}?recursive=1`);
+          if (res.ok) {
+            tree = await res.json();
+            resolvedBranch = branch;
+            break;
+          }
+        } catch (e) {}
+      }
+
+
+      if (!tree || !tree.tree) {
+        const res = await fetch(`https://api.github.com/repos/${EXPLORE_REPO}/contents`);
+        if (!res.ok) throw new Error('Official repository could not be loaded');
+        const contents = await res.json();
+        return contents
+          .filter(f => f.type === 'file' && /\.(html|htm)$/i.test(f.name))
+          .map(f => ({
+            source: 'repo',
+            path: f.name,
+            name: f.name.replace(/\.(html|htm)$/i, ''),
+            size: f.size || 0,
+            url: f.download_url,
+            meta: 'Official list'
+          }));
+      }
+
+
+      return tree.tree
+        .filter(e => e.type === 'blob' && /\.(html|htm)$/i.test(e.path))
+        .map(e => ({
+          source: 'repo',
+          path: e.path,
+          name: e.path.split('/').pop().replace(/\.(html|htm)$/i, ''),
+          size: e.size || 0,
+          url: `https://raw.githubusercontent.com/${EXPLORE_REPO}/${resolvedBranch}/${e.path.split('/').map(encodeURIComponent).join('/')}`,
+          meta: 'Official list'
+        }));
+    }
+
+
+    async function fetchGistHtmlPages() {
+      const pages = [];
+      let page = 1;
+
+
+      while (true) {
+        const res = await fetch(`https://api.github.com/users/${encodeURIComponent(GIST_USER)}/gists?per_page=${GISTS_PER_PAGE}&page=${page}`);
+        if (!res.ok) {
+          if (res.status === 403) throw new Error('GitHub API rate limit reached for Gists');
+          throw new Error(`Could not load public Gists (${res.status})`);
+        }
+
+
+        const gists = await res.json();
+        for (const gist of gists) {
+          const description = (gist.description || 'Untitled Gist').trim();
+          for (const file of Object.values(gist.files || {})) {
+            if (!/\.(html|htm)$/i.test(file.filename || '')) continue;
+            pages.push({
+              source: 'gist',
+              path: file.filename,
+              name: file.filename.replace(/\.(html|htm)$/i, ''),
+              size: file.size || 0,
+              url: file.raw_url,
+              meta: `Gist · ${description}`,
+              gistId: gist.id
+            });
+          }
+        }
+
+
+        if (gists.length < GISTS_PER_PAGE) break;
+        page++;
+      }
+
+
+      return pages;
+    }
+
+
+    async function exploreFetch() {
+      const container = document.getElementById('expContent');
+      container.innerHTML = '<div class="loading"><span class="spinner"></span> Refreshing official list and public Gists...</div>';
+
+
+      const [repoResult, gistResult] = await Promise.allSettled([
+        fetchRepoHtmlPages(),
+        fetchGistHtmlPages()
+      ]);
+
+
+      const pages = [];
+      const errors = [];
+      if (repoResult.status === 'fulfilled') pages.push(...repoResult.value);
+      else errors.push(repoResult.reason?.message || 'Official list could not be loaded');
+      if (gistResult.status === 'fulfilled') pages.push(...gistResult.value);
+      else errors.push(gistResult.reason?.message || 'Gists could not be loaded');
+
+
+      if (!pages.length) {
+        container.innerHTML = `<div class="empty"><i class="fa-solid fa-cloud-arrow-down"></i>Could not load any HTML pages<p>${esc(errors.join(' · '))} — tap Refresh to try again</p></div>`;
+        return;
+      }
+
+
+      exploreCache = pages;
+      renderExplore(errors);
+    }
+
+
+    function exploreRefresh() {
+      exploreCache = null;
+      exploreFetch();
+    }
+
+
+    function renderExplore(sourceErrors = []) {
+      const container = document.getElementById('expContent');
+      if (!exploreCache || exploreCache.length === 0) {
+        container.innerHTML = `<div class="empty"><i class="fa-regular fa-folder-open"></i>No HTML pages found<p>The official list and public Gists may be empty right now</p></div>`;
+        return;
+      }
+
+
+      const warning = sourceErrors.length ?
+        `<div style="font-size:11px;color:var(--fg2);padding:0 2px 10px"><i class="fa-solid fa-triangle-exclamation" style="color:var(--accent)"></i> Partial refresh: ${esc(sourceErrors.join(' · '))}</div>` :
+        '';
+
+
+      container.innerHTML = warning + exploreCache.map((f, i) => {
+        const sizeKB = (f.size / 1024).toFixed(1);
+        return `
+      <div class="exp-item" style="animation-delay:${i*40}ms" onclick="exploreOpen(${i})">
+        <div class="exp-icon"><i class="fa-solid ${f.source === 'gist' ? 'fa-code-fork' : 'fa-file-code'}"></i></div>
+        <div class="exp-info">
+          <div class="exp-name">${esc(f.name)}</div>
+          <div class="exp-path">${esc(f.meta || f.path)} · ${sizeKB} KB</div>
+        </div>
+        <div class="exp-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      </div>`;
+      }).join('');
+    }
+
+
+    async function exploreOpen(index) {
+      const file = exploreCache[index];
+      if (!file) return;
+      toast('Loading page...', 'info');
+      try {
+        const res = await fetch(file.url);
+        if (!res.ok) throw new Error('Failed to fetch');
+        const html = await res.text();
+        openAndAutoSave(html, file.name || file.path);
+      } catch (e) {
+        toast('Could not load: ' + e.message, 'err');
+      }
+    }
+
+
+    /* ─── Clear all data ─── */
+    async function clearAllData() {
+      const btn = document.getElementById('clearBtn');
+      if (btn.dataset.confirm) {
+        try {
+          await dbClear();
+          toast('All data cleared', 'ok');
+          renderSettings();
+          if (document.getElementById('panelLibrary').classList.contains('active')) renderLibrary();
+        } catch (e) {
+          toast('Clear failed: ' + e.message, 'err');
+        }
+        btn.dataset.confirm = '';
+        btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Clear All Saved Data';
+        btn.classList.remove('btn-p');
+        btn.classList.add('btn-d');
+      } else {
+        btn.dataset.confirm = '1';
+        btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Tap again to confirm';
+        btn.classList.remove('btn-d');
+        btn.classList.add('btn-p');
+        setTimeout(() => {
+          btn.dataset.confirm = '';
+          btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Clear All Saved Data';
+          btn.classList.remove('btn-p');
+          btn.classList.add('btn-d');
+        }, 3000);
+      }
+    }
+
+
+    /* ─── Init ─── */
+    (async function init() {
+      try {
+        await openDB();
+      } catch (e) {
+        toast('IndexedDB unavailable — library won\'t persist', 'err');
+      }
+      updateMethodPill();
+      editorUpdate();
+      exploreFetch();
+    })();
+
+(()=>{const NAME="Ion-o-koji's Portal"+(typeof APP_VERSION!=="undefined"?" "+APP_VERSION:""),VERSION="v4",KEY="Ion-o-koji's Watermark "+VERSION,TITLES_KEY="Ion-o-koji's Watermark Titles "+VERSION;function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){}return null}function now(){return new Date().toISOString()}function fmt(iso){try{return new Date(iso).toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"})}catch(e){return iso}}function getLoadTime(){try{const n=performance.getEntriesByType("navigation")[0];if(n&&n.loadEventEnd>0)return Math.round(n.loadEventEnd);const t=performance.timing;if(t&&t.loadEventEnd>0)return t.loadEventEnd-t.navigationStart}catch(e){}return null}function entryName(b){const m=b.match(/^> (.+)/);return m?m[1].trim():null}function buildEntry(first,last,count,lt,avg){let s="> "+NAME+"\n  - First opened: "+first+"\n  - Last opened: "+last+"\n  - Opened: "+count+" times";if(lt!=null)s+="\n  - Load time: "+lt+"ms";if(avg!=null)s+="\n  - Avg load time: "+avg+"ms";return s}function parseEntries(raw){if(!raw)return[];const res=[];let cur=[];for(const line of raw.split("\n")){if(/^> /.test(line)&&cur.length>0){const b=cur.join("\n").trimEnd();if(b)res.push(b);cur=[];}cur.push(line);}if(cur.length>0){const b=cur.join("\n").trimEnd();if(b&&/^> /.test(b))res.push(b);}return res}function parseEntry(b){if(!b)return null;const lines=b.split("\n"),get=f=>{const l=lines.find(l=>l.trim().startsWith("- "+f+": "));return l?l.trim().slice(f.length+3).trim():null},first=get("First opened"),opened=get("Opened");if(!first||!opened)return null;const count=parseInt(opened,10),avgStr=get("Avg load time");return{first,count:isNaN(count)?0:count,avgLoad:avgStr?parseInt(avgStr,10):null}}function updateTitles(){try{const raw=ls(TITLES_KEY)||"",others=raw.split("\n").map(l=>l.trim().replace(/^> /,"")).filter(l=>l&&l!==NAME);ls(TITLES_KEY,["> "+NAME,...others.map(l=>"> "+l)].join("\n"));}catch(e){}}try{const nowFmt=fmt(now()),lt=getLoadTime(),entries=parseEntries(ls(KEY)),existingIdx=entries.findIndex(b=>entryName(b)===NAME),existing=parseEntry(existingIdx>=0?entries[existingIdx]:null),others=entries.filter((_,i)=>i!==existingIdx),oldCount=existing?.count??0,newCount=oldCount+1,prevAvg=existing?.avgLoad??null;let newAvg=null;if(lt!=null)newAvg=(prevAvg!=null&&oldCount>0)?Math.round((prevAvg*oldCount+lt)/newCount):lt;else newAvg=prevAvg;const first=existing?.first??nowFmt;ls(KEY,[buildEntry(first,nowFmt,newCount,lt,newAvg),...others].join("\n\n"));updateTitles();}catch(e){}})();
+
+  </script>
+  
+      <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('Service Worker registered successfully:', reg))
+          .catch(err => console.error('Service Worker registration failed:', err));
+      }
+    </script>
+</body>
+
+
+</html>
